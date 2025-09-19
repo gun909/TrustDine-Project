@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require('express'); 
 const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
@@ -103,6 +103,32 @@ app.post('/forgot-password', (req, res) => {
 
   // In production: send reset link to email
   res.json({ message: 'Reset link will be sent if email exists.' });
+});
+
+// ✅ Reset password
+// 接收 email + newPassword，将密码加密后更新数据库
+app.post('/reset-password', async (req, res) => {
+  const { email, newPassword } = req.body;
+  if (!email || !newPassword) {
+    return res.status(400).json({ error: 'Email and new password are required.' });
+  }
+  try {
+    const hashed = await bcrypt.hash(newPassword, 10);
+    const sql = 'UPDATE user_login SET password = ? WHERE email = ?';
+    db.query(sql, [hashed, email], (err, result) => {
+      if (err) {
+        console.error('[DB ERROR]', err);
+        return res.status(500).json({ error: 'Server error.' });
+      }
+      if (result.affectedRows === 0) {
+        return res.status(404).json({ error: 'User not found.' });
+      }
+      res.json({ message: 'Password updated successfully.' });
+    });
+  } catch (hashErr) {
+    console.error('[HASH ERROR]', hashErr);
+    res.status(500).json({ error: 'Encryption error.' });
+  }
 });
 
 // Start server
