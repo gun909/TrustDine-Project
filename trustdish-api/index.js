@@ -97,31 +97,67 @@ app.post('/login', (req, res) => {
 });
 
 // Forgot password placeholder
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
+
+// 1️⃣ 用户提交邮箱：生成 token、保存数据库并发送邮件
 app.post('/forgot-password', (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email is required.' });
 
-  // In production: send reset link to email
-  res.json({ message: 'Reset link will be sent if email exists.' });
+  const token = crypto.randomBytes(32).toString('hex');
+  const expires = Date.now() + 3600000; // 1小时有效
+
+  const sql = 'UPDATE user_login SET reset_token=?, reset_expires=? WHERE email=?';
+  db.query(sql, [token, expires, email], (err, result) => {
+    if (err || result.affectedRows === 0) {
+      return res.status(400).json({ error: 'User not found.' });
+    }
+
+    // 使用 Nodemailer 发送重置邮件
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail', // 或其他SMTP
+      auth: {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,
+      },
+    });
+
+    const link = `https://your-frontend-domain/reset?token=${token}`;
+    const mailOptions = {
+      to: email,
+      subject: 'Reset your password',
+      text: `Click the link to reset your password: ${link}`,
+    };
+
+    transporter.sendMail(mailOptions, (mailErr) => {
+      if (mailErr) {
+        console.error('[MAIL ERROR]', mailErr);
+        return res.status(500).json({ error: 'Failed to send email.' });
+      }
+      res.json({ message: 'Reset email sent. Please check your inbox.' });
+    });
+  });
 });
 
-// ✅ Reset password
-// 接收 email + newPassword，将密码加密后更新数据库
+// 2️⃣ 用户点击邮件后，在前端输入新密码并提交 token
 app.post('/reset-password', async (req, res) => {
-  const { email, newPassword } = req.body;
-  if (!email || !newPassword) {
-    return res.status(400).json({ error: 'Email and new password are required.' });
+  const { token, newPassword } = req.body;
+  if (!token || !newPassword) {
+    return res.status(400).json({ error: 'Token and new password are required.' });
   }
+
   try {
     const hashed = await bcrypt.hash(newPassword, 10);
-    const sql = 'UPDATE user_login SET password = ? WHERE email = ?';
-    db.query(sql, [hashed, email], (err, result) => {
+    const sql =
+      'UPDATE user_login SET password=?, reset_token=NULL, reset_expires=NULL WHERE reset_token=? AND reset_expires > ?';
+    db.query(sql, [hashed, token, Date.now()], (err, result) => {
       if (err) {
         console.error('[DB ERROR]', err);
         return res.status(500).json({ error: 'Server error.' });
       }
       if (result.affectedRows === 0) {
-        return res.status(404).json({ error: 'User not found.' });
+        return res.status(400).json({ error: 'Invalid or expired token.' });
       }
       res.json({ message: 'Password updated successfully.' });
     });
@@ -130,6 +166,7 @@ app.post('/reset-password', async (req, res) => {
     res.status(500).json({ error: 'Encryption error.' });
   }
 });
+
 
 // Start server
 app.listen(PORT, () => {
