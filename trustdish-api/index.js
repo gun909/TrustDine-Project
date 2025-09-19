@@ -100,6 +100,46 @@ app.post('/login', (req, res) => {
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
 
+// SMTP transporter factory using environment variables
+function createSmtpTransporter() {
+  const hasSmtpHost = Boolean(process.env.MAIL_HOST);
+  if (hasSmtpHost) {
+    return nodemailer.createTransport({
+      host: process.env.MAIL_HOST,
+      port: Number(process.env.MAIL_PORT) || 587,
+      secure: String(process.env.MAIL_SECURE).toLowerCase() === 'true' || Number(process.env.MAIL_PORT) === 465,
+      auth: process.env.MAIL_USER && process.env.MAIL_PASS ? {
+        user: process.env.MAIL_USER,
+        pass: process.env.MAIL_PASS,
+      } : undefined,
+      pool: true,
+    });
+  }
+
+  // Fallback: service-based (e.g., Gmail) if configured
+  const service = process.env.MAIL_SERVICE || 'Gmail';
+  return nodemailer.createTransport({
+    service,
+    auth: {
+      user: process.env.MAIL_USER,
+      pass: process.env.MAIL_PASS,
+    },
+    pool: true,
+  });
+}
+
+// Endpoint to verify SMTP configuration (useful on Render)
+app.get('/smtp-verify', async (req, res) => {
+  try {
+    const transporter = createSmtpTransporter();
+    await transporter.verify();
+    res.json({ ok: true, message: 'SMTP connection successful' });
+  } catch (e) {
+    console.error('[SMTP VERIFY ERROR]', e);
+    res.status(500).json({ ok: false, error: 'SMTP verify failed', details: e && e.message });
+  }
+});
+
 // 1️⃣ 用户提交邮箱：生成 token、保存数据库并发送邮件
 app.post('/forgot-password', (req, res) => {
   const { email } = req.body;
@@ -114,23 +154,20 @@ app.post('/forgot-password', (req, res) => {
       return res.status(400).json({ error: 'User not found.' });
     }
 
-    // 使用 Nodemailer 发送重置邮件
-    const transporter = nodemailer.createTransport({
-      service: 'Gmail', // 或其他SMTP
-      auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASS,
-      },
-    });
+    // 使用 Nodemailer 发送重置邮件（基于环境变量配置）
+    const transporter = createSmtpTransporter();
 
-    const link = `https://your-frontend-domain/reset?token=${token}`;
+    const frontendBase = process.env.FRONTEND_URL || 'https://your-frontend-domain';
+    const link = `${frontendBase.replace(/\/$/, '')}/reset?token=${token}`;
     const mailOptions = {
+      from: process.env.MAIL_FROM || process.env.MAIL_USER,
       to: email,
       subject: 'Reset your password',
       text: `Click the link to reset your password: ${link}`,
+      html: `<p>Click the link to reset your password:</p><p><a href="${link}">${link}</a></p>`,
     };
 
-    transporter.sendMail(mailOptions, (mailErr) => {
+    transporter.sendMail(mailOptions, (mailErr, info) => {
       if (mailErr) {
         console.error('[MAIL ERROR]', mailErr);
         return res.status(500).json({ error: 'Failed to send email.' });
