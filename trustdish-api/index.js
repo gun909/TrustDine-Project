@@ -12,10 +12,10 @@ app.use(express.json());
 
 // Connect to MySQL Database
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,       // e.g. sql12.freesqldatabase.com
-  user: process.env.DB_USER,       // your DB username
-  password: process.env.DB_PASSWORD, // your DB password
-  database: process.env.DB_NAME    // your DB name
+  host: process.env.DB_HOST,       
+  user: process.env.DB_USER,       
+  password: process.env.DB_PASSWORD, 
+  database: process.env.DB_NAME   
 });
 
 db.connect((err) => {
