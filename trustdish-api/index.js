@@ -204,7 +204,7 @@ app.post('/reset-password', async (req, res) => {
   }
 });
 
-// Search restaurants by region
+//Search restaurants by region
 app.get('/api/search', (req, res) => {
   const { regions } = req.query;
 
@@ -215,12 +215,12 @@ app.get('/api/search', (req, res) => {
   const regionArray = regions.split(',').map(r => r.trim().replace(/'/g, ''));
   const placeholders = regionArray.map(() => '?').join(',');
 
-  const sql = `SELECT * FROM restaurant_data WHERE Location_Region IN (${placeholders})`;
+  const sql = `SELECT * FROM google_reviews WHERE Location_Region IN (${placeholders})`;
 
   db.query(sql, regionArray, (err, results) => {
     if (err) {
-      console.error('SQL 查询错误:', err);
-      return res.status(500).json({ error: 'Database error' });
+      console.error('❌ SQL error:', err.message, err.sqlMessage);
+      return res.status(500).json({ error: 'Database error', details: err.message });
     }
 
     res.json(results);
