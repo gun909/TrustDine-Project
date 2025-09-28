@@ -12,10 +12,10 @@ app.use(express.json());
 
 // Connect to MySQL Database
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,       // e.g. sql12.freesqldatabase.com
-  user: process.env.DB_USER,       // your DB username
-  password: process.env.DB_PASSWORD, // your DB password
-  database: process.env.DB_NAME    // your DB name
+  host: process.env.DB_HOST,       
+  user: process.env.DB_USER,       
+  password: process.env.DB_PASSWORD, 
+  database: process.env.DB_NAME   
 });
 
 db.connect((err) => {
@@ -202,6 +202,29 @@ app.post('/reset-password', async (req, res) => {
     console.error('[HASH ERROR]', hashErr);
     res.status(500).json({ error: 'Encryption error.' });
   }
+});
+
+// Search restaurants by region
+app.get('/api/search', (req, res) => {
+  const { regions } = req.query;
+
+  if (!regions) {
+    return res.status(400).json({ error: 'Missing region parameter' });
+  }
+
+  const regionArray = regions.split(',').map(r => r.trim().replace(/'/g, ''));
+  const placeholders = regionArray.map(() => '?').join(',');
+
+  const sql = `SELECT * FROM restaurant_data WHERE Location_Region IN (${placeholders})`;
+
+  db.query(sql, regionArray, (err, results) => {
+    if (err) {
+      console.error('SQL 查询错误:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    res.json(results);
+  });
 });
 
 
