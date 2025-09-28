@@ -12,10 +12,10 @@ app.use(express.json());
 
 // Connect to MySQL Database
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,       
-  user: process.env.DB_USER,       
-  password: process.env.DB_PASSWORD, 
-  database: process.env.DB_NAME   
+  host: process.env.DB_HOST,       // e.g. sql12.freesqldatabase.com
+  user: process.env.DB_USER,       // your DB username
+  password: process.env.DB_PASSWORD, // your DB password
+  database: process.env.DB_NAME    // your DB name
 });
 
 db.connect((err) => {
@@ -157,7 +157,7 @@ app.post('/forgot-password', (req, res) => {
     // 使用 Nodemailer 发送重置邮件（基于环境变量配置）
     const transporter = createSmtpTransporter();
 
-    const frontendBase = process.env.FRONTEND_URL || 'https://your-frontend-domain';
+    const frontendBase = process.env.FRONTEND_URL || 'https://trustdish-reset.netlify.app';
     const link = `${frontendBase.replace(/\/$/, '')}/reset?token=${token}`;
     const mailOptions = {
       from: process.env.MAIL_FROM || process.env.MAIL_USER,
