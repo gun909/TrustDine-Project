@@ -209,7 +209,7 @@ app.get('/api/search', (req, res) => {
   const regionArray = regions.split(',').map(r => r.trim().replace(/'/g, ''));
   const placeholders = regionArray.map(() => '?').join(',');
 
-  const sql = `SELECT * FROM restaurant_data WHERE Location_Region IN (${placeholders})`;
+  const sql = `SELECT * FROM google_reviews WHERE Location_Region IN (${placeholders})`;
 
   db.query(sql, regionArray, (err, results) => {
     if (err) {
