@@ -1,37 +1,40 @@
-const express = require('express'); 
+const express = require('express');
 const mysql = require('mysql2');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
+const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
+// ──────────────────── Middleware ────────────────────
 app.use(cors());
 app.use(express.json());
 
-// Connect to MySQL Database
+// ──────────────────── MySQL Connection ────────────────────
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,       
-  user: process.env.DB_USER,       
-  password: process.env.DB_PASSWORD, 
-  database: process.env.DB_NAME   
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 });
 
 db.connect((err) => {
   if (err) {
-    console.error('Database connection failed:', err);
+    console.error('❌ Database connection failed:', err);
     process.exit(1);
   }
   console.log('✅ Connected to MySQL Database');
 });
 
 // Routes
+// 🌐 Ping route
 app.get('/', (req, res) => {
   res.send('TrustDish Backend is running');
 });
 
-// Register new user
+// 👤 User signup
 app.post('/signup', async (req, res) => {
   const { name, email, password, admin = false } = req.body;
   if (!name || !email || !password) {
@@ -55,7 +58,7 @@ app.post('/signup', async (req, res) => {
   }
 });
 
-// Login
+//Login
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
   const sql = 'SELECT * FROM user_login WHERE email = ?';
@@ -74,12 +77,10 @@ app.post('/login', (req, res) => {
 
     try {
       const isMatch = await bcrypt.compare(password, user.password);
-
       if (!isMatch) {
         return res.status(400).json({ error: 'Invalid email or password.' });
       }
 
-      // Login successful
       res.json({
         message: 'Login successful.',
         user: {
@@ -96,11 +97,7 @@ app.post('/login', (req, res) => {
   });
 });
 
-// Forgot password placeholder
-const nodemailer = require('nodemailer');
-const crypto = require('crypto');
-
-// SMTP transporter factory using environment variables
+//Forgot password: create transporter
 function createSmtpTransporter() {
   const hasSmtpHost = Boolean(process.env.MAIL_HOST);
   if (hasSmtpHost) {
@@ -116,7 +113,6 @@ function createSmtpTransporter() {
     });
   }
 
-  // Fallback: service-based (e.g., Gmail) if configured
   const service = process.env.MAIL_SERVICE || 'Gmail';
   return nodemailer.createTransport({
     service,
@@ -128,7 +124,7 @@ function createSmtpTransporter() {
   });
 }
 
-// Endpoint to verify SMTP configuration (useful on Render)
+//Test SMTP
 app.get('/smtp-verify', async (req, res) => {
   try {
     const transporter = createSmtpTransporter();
@@ -136,17 +132,17 @@ app.get('/smtp-verify', async (req, res) => {
     res.json({ ok: true, message: 'SMTP connection successful' });
   } catch (e) {
     console.error('[SMTP VERIFY ERROR]', e);
-    res.status(500).json({ ok: false, error: 'SMTP verify failed', details: e && e.message });
+    res.status(500).json({ ok: false, error: 'SMTP verify failed', details: e.message });
   }
 });
 
-// 1️⃣ 用户提交邮箱：生成 token、保存数据库并发送邮件
+//Forgot password request
 app.post('/forgot-password', (req, res) => {
   const { email } = req.body;
   if (!email) return res.status(400).json({ error: 'Email is required.' });
 
   const token = crypto.randomBytes(32).toString('hex');
-  const expires = Date.now() + 3600000; // 1小时有效
+  const expires = Date.now() + 3600000;
 
   const sql = 'UPDATE user_login SET reset_token=?, reset_expires=? WHERE email=?';
   db.query(sql, [token, expires, email], (err, result) => {
@@ -154,20 +150,18 @@ app.post('/forgot-password', (req, res) => {
       return res.status(400).json({ error: 'User not found.' });
     }
 
-    // 使用 Nodemailer 发送重置邮件（基于环境变量配置）
     const transporter = createSmtpTransporter();
-
     const frontendBase = process.env.FRONTEND_URL || 'https://trustdish-reset.netlify.app';
     const link = `${frontendBase.replace(/\/$/, '')}/reset?token=${token}`;
+
     const mailOptions = {
       from: process.env.MAIL_FROM || process.env.MAIL_USER,
       to: email,
       subject: 'Reset your password',
-      text: `Click the link to reset your password: ${link}`,
       html: `<p>Click the link to reset your password:</p><p><a href="${link}">${link}</a></p>`,
     };
 
-    transporter.sendMail(mailOptions, (mailErr, info) => {
+    transporter.sendMail(mailOptions, (mailErr) => {
       if (mailErr) {
         console.error('[MAIL ERROR]', mailErr);
         return res.status(500).json({ error: 'Failed to send email.' });
@@ -177,7 +171,7 @@ app.post('/forgot-password', (req, res) => {
   });
 });
 
-// 2️⃣ 用户点击邮件后，在前端输入新密码并提交 token
+//Reset password
 app.post('/reset-password', async (req, res) => {
   const { token, newPassword } = req.body;
   if (!token || !newPassword) {
@@ -215,20 +209,19 @@ app.get('/api/search', (req, res) => {
   const regionArray = regions.split(',').map(r => r.trim().replace(/'/g, ''));
   const placeholders = regionArray.map(() => '?').join(',');
 
-  const sql = `SELECT * FROM google_reviews WHERE Location_Region IN (${placeholders})`;
+  const sql = `SELECT * FROM restaurant_data WHERE Location_Region IN (${placeholders})`;
 
   db.query(sql, regionArray, (err, results) => {
     if (err) {
-      console.error('❌ SQL error:', err.message, err.sqlMessage);
-      return res.status(500).json({ error: 'Database error', details: err.message });
+      console.error('🔴 SQL 查询错误:', err);
+      return res.status(500).json({ error: 'Database error' });
     }
 
     res.json(results);
   });
 });
 
-
-// Start server
+//Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
 });
