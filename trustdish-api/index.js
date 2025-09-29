@@ -198,6 +198,21 @@ app.post('/reset-password', async (req, res) => {
   }
 });
 
+//Test endpoint to check what regions exist in database
+app.get('/api/test-regions', (req, res) => {
+  const sql = 'SELECT DISTINCT Location_Region, COUNT(*) as count FROM google_reviews GROUP BY Location_Region ORDER BY Location_Region';
+  
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Test regions query error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+
+    console.log('🔍 Available regions in database:', results);
+    res.json(results);
+  });
+});
+
 //Search restaurants by region
 app.get('/api/search', (req, res) => {
   const { regions } = req.query;
@@ -208,14 +223,24 @@ app.get('/api/search', (req, res) => {
 
   const regionArray = regions.split(',').map(r => r.trim().replace(/'/g, ''));
   const placeholders = regionArray.map(() => '?').join(',');
-
   const sql = `SELECT * FROM google_reviews WHERE Location_Region IN (${placeholders})`;
 
   db.query(sql, regionArray, (err, results) => {
     if (err) {
-      console.error('🔴 SQL 查询错误:', err);
+      console.error('Database query error:', err);
       return res.status(500).json({ error: 'Database error' });
     }
+
+    console.log('🔍 API - Query results count:', results.length);
+    console.log('🔍 API - Regions searched:', regionArray);
+    
+    // Group results by Location_Region to see distribution
+    const regionCounts = {};
+    results.forEach(row => {
+      const region = row.Location_Region;
+      regionCounts[region] = (regionCounts[region] || 0) + 1;
+    });
+    console.log('🔍 API - Results by region:', regionCounts);
 
     res.json(results);
   });
