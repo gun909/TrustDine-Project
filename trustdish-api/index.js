@@ -246,6 +246,49 @@ app.get('/api/search', (req, res) => {
   });
 });
 
+// Search trust endpoint
+app.get('/api/search-trust', (req, res) => {
+  const { restaurantName } = req.query;
+  console.log('🔍 Trust Search - Received restaurant name:', restaurantName);
+  
+  if (!restaurantName) {
+    return res.status(400).json({ error: 'Restaurant name is required' });
+  }
+
+  // Use Tripadvisor_TrustView table to define Status
+  const sql = 'SELECT * FROM Tripadvisor_TrustView WHERE Rest_Name LIKE ?';
+  
+  const searchTerm = `%${restaurantName}%`;
+  
+  console.log('🔍 Trust Search - SQL query:', sql);
+  console.log('🔍 Trust Search - Search term:', searchTerm);
+  
+  db.query(sql, [searchTerm], (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    console.log('🔍 Trust Search - Results count:', results.length);
+    console.log('🔍 Trust Search - Sample results:', results.slice(0, 3));
+    
+    res.json(results);
+  });
+});
+
+// Test endpoint to check available regions
+app.get('/api/test-regions', (req, res) => {
+  const sql = 'SELECT DISTINCT Location_Region, COUNT(*) as count FROM google_reviews GROUP BY Location_Region ORDER BY Location_Region';
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    console.log('🔍 Available regions in database:', results);
+    res.json(results);
+  });
+});
+
 //Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
