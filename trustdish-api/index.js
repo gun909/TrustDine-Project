@@ -14,15 +14,20 @@ app.use(express.json());
 
 // ──────────────────── MySQL Connection ────────────────────
 const db = mysql.createConnection({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'trustdine',
 });
 
 db.connect((err) => {
   if (err) {
     console.error('❌ Database connection failed:', err);
+    console.error('❌ Connection details:', {
+      host: process.env.DB_HOST || 'localhost',
+      user: process.env.DB_USER || 'root',
+      database: process.env.DB_NAME || 'trustdine'
+    });
     process.exit(1);
   }
   console.log('✅ Connected to MySQL Database');
@@ -320,13 +325,17 @@ app.post('/api/submit-review', (req, res) => {
     return res.status(400).json({ error: 'Rest_ID and Description are required' });
   }
 
-  const sql = 'INSERT INTO user_reviews (Rest_ID, Description, Review_New, Upload_Image, Approval, Review_Date) VALUES (?, ?, ?, ?, ?, NOW())';
+  const sql = 'INSERT INTO User_Reviews (Rest_ID, Description, Review_New, Upload_Image, Approval, Review_Date) VALUES (?, ?, ?, ?, ?, NOW())';
+  
+  console.log('🔍 Submit Review - SQL:', sql);
+  console.log('🔍 Submit Review - Data:', { Rest_ID, Description, Review_New, Upload_Image, Approval });
   
   db.query(sql, [Rest_ID, Description, Review_New, Upload_Image, Approval], (err, results) => {
     if (err) {
-      console.error('Database error:', err);
+      console.error('❌ Database error:', err);
       return res.status(500).json({ error: 'Database error' });
     }
+    console.log('✅ Review submitted successfully:', results);
     res.json({ success: true, id: results.insertId });
   });
 });
