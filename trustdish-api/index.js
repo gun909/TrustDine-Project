@@ -361,13 +361,13 @@ app.get('/api/user-reviews', (req, res) => {
       ur.Review_Record,
       ur.User_ID,
       ur.Rest_ID,
-      tt.Rest_Name,
+      gr.Rest_Name,
       ur.Review_Date,
       ur.Review_New,
       ur.Unique_Review,
       ur.Updated_TATable
     FROM User_Reviews ur
-    LEFT JOIN Tripadvisor_TrustView tt ON ur.Rest_ID = tt.Rest_ID
+    LEFT JOIN google_reviews gr ON ur.Rest_ID = gr.Rest_ID
     ORDER BY ur.Review_Record DESC
   `;
   
@@ -378,6 +378,26 @@ app.get('/api/user-reviews', (req, res) => {
       return res.status(500).json({ error: 'Database error' });
     }
     console.log('✅ User Reviews - Results count:', results.length);
+    console.log('🔍 User Reviews - Sample results:', results.slice(0, 3));
+    
+    // Debug: Check if Rest_IDs exist in google_reviews
+    if (results.length > 0) {
+      const restIds = results.map(r => r.Rest_ID).filter(id => id);
+      console.log('🔍 User Reviews - Rest_IDs from User_Reviews:', restIds);
+      
+      // Check which Rest_IDs exist in google_reviews
+      if (restIds.length > 0) {
+        const checkSQL = 'SELECT Rest_ID, Rest_Name FROM google_reviews WHERE Rest_ID IN (' + restIds.map(() => '?').join(',') + ')';
+        db.query(checkSQL, restIds, (checkErr, checkResults) => {
+          if (!checkErr) {
+            console.log('🔍 User Reviews - Rest_IDs found in google_reviews:', checkResults);
+          } else {
+            console.log('❌ Error checking google_reviews:', checkErr);
+          }
+        });
+      }
+    }
+    
     res.json(results);
   });
 });
@@ -472,6 +492,46 @@ app.post('/api/update-reviews', (req, res) => {
             });
           }
         });
+      });
+    });
+  });
+});
+
+// Test endpoint to check User_Reviews data
+app.get('/api/test-user-reviews', (req, res) => {
+  console.log('🔍 Test User Reviews - Request received');
+  
+  // First, check what's in User_Reviews table
+  const userReviewsSQL = 'SELECT * FROM User_Reviews ORDER BY Review_Record DESC LIMIT 5';
+  db.query(userReviewsSQL, (err, userResults) => {
+    if (err) {
+      console.error('❌ Error getting User_Reviews:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    console.log('🔍 User_Reviews data:', userResults);
+    
+    // Then check the JOIN query
+    const joinSQL = `
+      SELECT 
+        ur.Review_Record,
+        ur.Rest_ID,
+        gr.Rest_Name
+      FROM User_Reviews ur
+      LEFT JOIN google_reviews gr ON ur.Rest_ID = gr.Rest_ID
+      ORDER BY ur.Review_Record DESC
+    `;
+    
+    db.query(joinSQL, (joinErr, joinResults) => {
+      if (joinErr) {
+        console.error('❌ Error with JOIN query:', joinErr);
+        return res.status(500).json({ error: 'JOIN query error' });
+      }
+      
+      console.log('🔍 JOIN query results:', joinResults);
+      res.json({
+        userReviews: userResults,
+        joinResults: joinResults
       });
     });
   });
