@@ -248,12 +248,18 @@ app.get('/api/search', (req, res) => {
 
 // Search trust endpoint
 app.get('/api/search-trust', (req, res) => {
+  console.log('🔍 Trust Search API - Request received');
+  console.log('🔍 Trust Search API - Query params:', req.query);
+  
   const { restaurantName } = req.query;
   console.log('🔍 Trust Search - Received restaurant name:', restaurantName);
   
   if (!restaurantName) {
+    console.log('❌ Trust Search API - No restaurant name provided');
     return res.status(400).json({ error: 'Restaurant name is required' });
   }
+
+  console.log('✅ Trust Search API - Restaurant name received:', restaurantName);
 
   // Use Tripadvisor_TrustView table to define Status
   const sql = 'SELECT * FROM Tripadvisor_TrustView WHERE Rest_Name LIKE ?';
@@ -265,14 +271,63 @@ app.get('/api/search-trust', (req, res) => {
   
   db.query(sql, [searchTerm], (err, results) => {
     if (err) {
-      console.error('Database error:', err);
+      console.error('❌ Trust Search API - Database error:', err);
+      console.error('❌ Trust Search API - Error details:', {
+        code: err.code,
+        errno: err.errno,
+        sqlState: err.sqlState,
+        sqlMessage: err.sqlMessage
+      });
       return res.status(500).json({ error: 'Database error' });
     }
     
-    console.log('🔍 Trust Search - Results count:', results.length);
-    console.log('🔍 Trust Search - Sample results:', results.slice(0, 3));
+    console.log('✅ Trust Search API - Query successful');
+    console.log('📊 Trust Search - Results count:', results.length);
+    console.log('📊 Trust Search - All results:', results);
+    
+    if (results.length === 0) {
+      console.log('⚠️ Trust Search API - No results found for search term:', searchTerm);
+    }
     
     res.json(results);
+  });
+});
+
+// Search restaurant by ID endpoint
+app.get('/api/search-restaurant', (req, res) => {
+  const { restaurantId } = req.query;
+  
+  if (!restaurantId) {
+    return res.status(400).json({ error: 'Restaurant ID is required' });
+  }
+
+  const sql = 'SELECT Rest_ID, Rest_Name, Latitude, Longitude FROM google_reviews WHERE Rest_ID = ?';
+  
+  db.query(sql, [restaurantId], (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json(results);
+  });
+});
+
+// Submit review endpoint
+app.post('/api/submit-review', (req, res) => {
+  const { Rest_ID, Description, Review_New, Upload_Image, Approval } = req.body;
+  
+  if (!Rest_ID || !Description) {
+    return res.status(400).json({ error: 'Rest_ID and Description are required' });
+  }
+
+  const sql = 'INSERT INTO user_reviews (Rest_ID, Description, Review_New, Upload_Image, Approval, Review_Date) VALUES (?, ?, ?, ?, ?, NOW())';
+  
+  db.query(sql, [Rest_ID, Description, Review_New, Upload_Image, Approval], (err, results) => {
+    if (err) {
+      console.error('Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json({ success: true, id: results.insertId });
   });
 });
 
