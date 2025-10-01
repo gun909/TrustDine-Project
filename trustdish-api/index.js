@@ -497,6 +497,55 @@ app.post('/api/update-reviews', (req, res) => {
   });
 });
 
+// Update user profile
+app.post('/api/update-profile', async (req, res) => {
+  const { userId, newEmail, oldPassword } = req.body;
+  console.log('🔍 Update Profile - Request received:', { userId, newEmail });
+  
+  if (!userId || !newEmail || !oldPassword) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    // First, verify the old password
+    const userSQL = 'SELECT password FROM user_login WHERE user_id = ?';
+    db.query(userSQL, [userId], async (err, results) => {
+      if (err) {
+        console.error('❌ Update Profile - Database error:', err);
+        return res.status(500).json({ error: 'Database error' });
+      }
+
+      if (results.length === 0) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+
+      const user = results[0];
+      
+      // Verify old password
+      const isMatch = await bcrypt.compare(oldPassword, user.password);
+      if (!isMatch) {
+        console.log('❌ Update Profile - Password incorrect');
+        return res.json({ success: false, message: 'Password incorrect' });
+      }
+
+      // Update email
+      const updateSQL = 'UPDATE user_login SET email = ? WHERE user_id = ?';
+      db.query(updateSQL, [newEmail, userId], (updateErr, updateResults) => {
+        if (updateErr) {
+          console.error('❌ Update Profile - Update error:', updateErr);
+          return res.status(500).json({ error: 'Failed to update profile' });
+        }
+
+        console.log('✅ Update Profile - Profile updated successfully');
+        res.json({ success: true, message: 'Profile updated successfully' });
+      });
+    });
+  } catch (error) {
+    console.error('❌ Update Profile - Error:', error);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
 // Test endpoint to check User_Reviews data
 app.get('/api/test-user-reviews', (req, res) => {
   console.log('🔍 Test User Reviews - Request received');
