@@ -353,6 +353,130 @@ app.get('/api/test-regions', (req, res) => {
   });
 });
 
+// Get user reviews with restaurant names
+app.get('/api/user-reviews', (req, res) => {
+  console.log('🔍 User Reviews API - Request received');
+  const sql = `
+    SELECT 
+      ur.Review_Record,
+      ur.User_ID,
+      ur.Rest_ID,
+      tt.Rest_Name,
+      ur.Review_Date,
+      ur.Review_New,
+      ur.Unique_Review,
+      ur.Updated_TATable
+    FROM User_Reviews ur
+    LEFT JOIN Tripadvisor_TrustView tt ON ur.Rest_ID = tt.Rest_ID
+    ORDER BY ur.Review_Record DESC
+  `;
+  
+  console.log('🔍 User Reviews - SQL:', sql);
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('❌ User Reviews API - Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    console.log('✅ User Reviews - Results count:', results.length);
+    res.json(results);
+  });
+});
+
+// Check if user is admin
+app.get('/api/check-admin', (req, res) => {
+  const { userId } = req.query;
+  console.log('🔍 Check Admin - User ID:', userId);
+  
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+  
+  const sql = 'SELECT admin FROM user_login WHERE user_id = ?';
+  db.query(sql, [userId], (err, results) => {
+    if (err) {
+      console.error('❌ Check Admin - Database error:', err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    
+    if (results.length === 0) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    const isAdmin = results[0].admin === 1;
+    console.log('✅ Check Admin - Is admin:', isAdmin);
+    res.json({ isAdmin });
+  });
+});
+
+// Update reviews (admin only)
+app.post('/api/update-reviews', (req, res) => {
+  const { reviewRecords } = req.body;
+  console.log('🔍 Update Reviews - Records to update:', reviewRecords);
+  
+  if (!reviewRecords || reviewRecords.length === 0) {
+    return res.status(400).json({ error: 'No records to update' });
+  }
+  
+  // Start transaction
+  db.beginTransaction((err) => {
+    if (err) {
+      console.error('❌ Update Reviews - Transaction error:', err);
+      return res.status(500).json({ error: 'Transaction error' });
+    }
+    
+    let completed = 0;
+    let hasError = false;
+    
+    reviewRecords.forEach((record, index) => {
+      // Update Tripadvisor_TrustView
+      const updateTrustSQL = `
+        UPDATE Tripadvisor_TrustView 
+        SET 
+          TripAdv_Rating = (TripAdv_Reviews * TripAdv_Rating + ?) / (TripAdv_Reviews + 1),
+          TripAdv_Reviews = TripAdv_Reviews + 1,
+          TimeStamp = ?
+        WHERE Rest_ID = ?
+      `;
+      
+      db.query(updateTrustSQL, [record.Review_New, record.Review_Date, record.Rest_ID], (err) => {
+        if (err) {
+          console.error('❌ Update Tripadvisor_TrustView error:', err);
+          hasError = true;
+          return db.rollback(() => {
+            res.status(500).json({ error: 'Failed to update Tripadvisor_TrustView' });
+          });
+        }
+        
+        // Update User_Reviews
+        const updateUserSQL = 'UPDATE User_Reviews SET Updated_TATable = 1 WHERE Review_Record = ?';
+        db.query(updateUserSQL, [record.Review_Record], (err) => {
+          if (err) {
+            console.error('❌ Update User_Reviews error:', err);
+            hasError = true;
+            return db.rollback(() => {
+              res.status(500).json({ error: 'Failed to update User_Reviews' });
+            });
+          }
+          
+          completed++;
+          if (completed === reviewRecords.length && !hasError) {
+            db.commit((err) => {
+              if (err) {
+                console.error('❌ Commit error:', err);
+                return db.rollback(() => {
+                  res.status(500).json({ error: 'Failed to commit transaction' });
+                });
+              }
+              console.log('✅ Update Reviews - All records updated successfully');
+              res.json({ success: true, updated: completed });
+            });
+          }
+        });
+      });
+    });
+  });
+});
+
 //Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on port ${PORT}`);
