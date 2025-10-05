@@ -53,7 +53,11 @@ TrustDine/
 ├── regionPoints.js        # Auckland region coordinates
 ├── .env                   # Environment variables
 ├── package.json           # Frontend dependencies
-├── CreateDB Four Tables Explaination.sql	# Explain Four tables created method and stored in Google SQL
+├── Database Tables	   # Three main tables example to record all the restaurant details
+│   ├── CreateDB Four Tables Explaination.sql	# Explain Four tables created method and stored in Google SQL
+│   ├──  Google_Reviews.csv			# Three Key tables example to record data starched from scraper
+│   ├──  Tripadvisor_TrustView.xlsx
+│   └──  User Reivews.xlsx
 └── TrustDine.apk	   # Andriod File, You can directly install it 100% virus free Garantee
 └── README.md              # This file
 
@@ -85,7 +89,7 @@ trustdine-DB/
 npm install
 ```
 
-### 2. Setup `.env`
+### 2. Setup `.env` (Already Exist, if not create one)
 
 Create a `.env` file at the root:
 
