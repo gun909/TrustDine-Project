@@ -1,0 +1,152 @@
+## TrustDine App
+
+TrustDine is a cross-platform mobile app, using React Native + Node.js powered restaurant review platform built for food lovers in Auckland. It integrates Google Maps & TripAdvisor databases and store in Google SQL, performs intelligent scraping, and allows user-submitted reviews. The goal is to help users find the most trustworthy restaurants based on rating, location, and dish preferences.
+
+---
+
+## Features
+
+- **Smart Restaurant Search**
+  - Filter by region, dish type, distance, and rating
+- **Google Maps Integration**
+  - Uses lat/lng from Google Places API for accurate listings
+- **Database Storage**
+- Uses Google SQL to store the database
+- **Restaurant Scraper Tool**
+  - Built-in Node.js script to fetch restaurant metadata from Google
+- **User Reviews**
+  - Check User's GPS to secure the user within restaurant's region area and allow authorized user to rate for food, price, service, etc.
+- **Admin-Approved Ratings**
+  - Uses dual-source verification (Google + TripAdvisor)
+- **Secure Authentication**
+  - Sign up / login with hashed passwords and session tokens
+- **Mobile-First Design**
+  - Built with React Native and Material 3 UI theme (React Native Paper)
+
+---
+
+## Project Structure
+
+All the files has been encrypted into ZIP, Pasword has been included in Project Summary.
+
+```
+TrustDine/
+│
+├── .expo/                 # Expo configuration
+├── assets/                # Images, icons, etc.
+├── components/            # Reusable UI components
+├── screens/               # All UI screens (Login, Search, Profile, etc.)
+│   ├── ForgotScreen.js
+│   ├── LoginScreen.js
+│   ├── SignUpScreen.js	   # Login/Sign-Up/Forgot Passwords Screens basically built for authorized access.	
+│   ├── HomeScreen.js	   # TrustDine Start Point, user input Google formatted Address to search restaurant near the address
+│   ├	└──SearchResultsScreen.js #Return search results from HomeScreen.js Table: google_reviews
+│   ├──  ReviewScreen.js
+│   ├──  HistoryScreen.js   # Built for Admin only to approve user reviews and update tables stored in Google SQL	
+│   └── ProfileScreen.js   # Easily update user's email address
+├── restaurant-scraper/    # Node.js Google Places scraper
+│   ├── index.js
+│   └── package.json
+├── trustdish-api/         # (Placeholder for backend or API integration)
+├── App.js                 # Main entry point
+├── regionPoints.js        # Auckland region coordinates
+├── .env                   # Environment variables
+├── package.json           # Frontend dependencies
+├── CreateDB Four Tables Explaination.sql	# Explain Four tables created method and stored in Google SQL
+└── README.md              # This file
+
+
+---
+
+## Database Structure
+
+trustdine-DB/
+│
+├── google_reviews 		# Table 1, information extracted by using "restaurant-scraper", locked for review only. 
+├── Tripadvisor_TrustView 	# Table 2, information partly extracted by using "restaurant-scraper", approved user reviews can update this table.
+├── user_login			# 
+
+
+## Getting Started
+
+### Prerequisites
+
+- [Node.js](https://nodejs.org/)
+- [Expo CLI](https://docs.expo.dev/get-started/installation/)
+- MySQL (e.g., Google Cloud SQL)
+- Google Maps & Places API Key
+
+### 1. Install Dependencies
+
+```bash
+npm install
+```
+
+### 2. Setup `.env`
+
+Create a `.env` file at the root:
+
+```
+GOOGLE_API_KEY=your_google_api_key
+MYSQL_HOST=your_db_host
+MYSQL_USER=your_user
+MYSQL_PASSWORD=your_password
+MYSQL_DATABASE=your_database
+```
+
+### 3. Run React Native App
+
+```bash
+npx expo start
+```
+
+Scan QR code using Expo Go app on your phone (Or Best way to download this APP Android Version and testing by using below link).
+https://expo.dev/accounts/gun101/projects/trustdine/builds/05e6856e-27d1-478f-b171-25d1df8f0a2e
+
+
+### 4. Run Scraper (NOTE: the server related to Scraper is now disabled because free only support one server running)
+
+```bash
+cd restaurant-scraper
+node index.js
+```
+
+---
+
+## RUN TrustDine APP Screens in Visual Studio (NOTE: the server related to Scraper is now enabled 24/7)
+cd npx expo start
+
+Screens include:
+- `HomeScreen.js`: Filter restaurants by region, rating, dish type
+- `SearchResultsScreen.js`: Table view of search results
+- `ReviewScreen.js`: Submit reviews for each restaurant
+- `SignUpScreen.js`, `LoginScreen.js`: User auth
+- `ProfileScreen.js`, `HistoryScreen.js`
+
+---
+
+## Security Notes
+
+- Passwords are hashed using `bcrypt`
+- All API keys and DB credentials are managed via `.env`
+- Frontend/backend communication secured via `HTTPS` (if deployed)
+
+---
+
+## Region Coverage
+
+`regionPoints.js` contains a full mapping of Auckland sub-regions (e.g., CBD, Mount Eden, Newmarket) with 5-point lat/lng coverage per area. This ensures accurate coverage for API queries and map displays.
+
+---
+
+## Contributors
+
+- Edison Hu – Developer, Architect, UI Designer
+- GPT Assistant – Documentation support
+
+---
+
+
+## Feedback & Contact
+
+For issues, bugs, or feedback, please open a GitHub issue or contact Edison via [hubaosen12@gmail.com]
