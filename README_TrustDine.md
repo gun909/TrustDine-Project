@@ -53,6 +53,7 @@ TrustDine/
 ├── .env                   # Environment variables
 ├── package.json           # Frontend dependencies
 ├── CreateDB Four Tables Explaination.sql	# Explain Four tables created method and stored in Google SQL
+└── TrustDine.apk	   # Andriod File, You can directly install it 100% virus free Garantee
 └── README.md              # This file
 
 
@@ -64,7 +65,8 @@ trustdine-DB/
 │
 ├── google_reviews 		# Table 1, information extracted by using "restaurant-scraper", locked for review only. 
 ├── Tripadvisor_TrustView 	# Table 2, information partly extracted by using "restaurant-scraper", approved user reviews can update this table.
-├── user_login			# 
+├── user_login			# Table 3, Store user info, can be update in ProfileScreen.js
+├── User_Reviews		# Table 4, Store user new review info, will update Table 2 when Admin Approve. Update method: (New Review + Old Review * Old Review Numbers) / (Old Review Numbers +1)
 
 
 ## Getting Started
