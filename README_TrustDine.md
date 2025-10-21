@@ -1,4 +1,4 @@
-## TrustDine App
+## TrustDine App This project is designed for AUT COMP826 Mobile System Development Year 2025
 
 TrustDine is a cross-platform mobile app, using React Native + Node.js powered restaurant review platform built for food lovers in Auckland. It integrates Google Maps & TripAdvisor databases and store in Google SQL, performs intelligent scraping, and allows user-submitted reviews. The goal is to help users find the most trustworthy restaurants based on rating, location, and dish preferences.
 Demo Display Youtube Intro: https://www.youtube.com/watch?v=lAuEq4cH3fE
@@ -108,7 +108,7 @@ MYSQL_DATABASE=your_database
 npx expo start
 ```
 
-Scan QR code using Expo Go app on your phone (Or Best way to download this APP Android Version and testing by using below link).
+Scan QR code using Expo Go app on your phone (Or Best way to download this APP Android Version and testing by GitHub New Version Release or using below link).
 https://expo.dev/accounts/gun101/projects/trustdine/builds/05e6856e-27d1-478f-b171-25d1df8f0a2e
 
 
@@ -121,7 +121,7 @@ node index.js
 
 ---
 
-## RUN TrustDine APP Screens in Visual Studio (NOTE: the server related to Scraper is now enabled 24/7)
+## RUN TrustDine APP Screens in Visual Studio (NOTE: the server related to Scraper is now enabled 24/7 till 1/Dec/2025)
 cd npx expo start
 
 Screens include:
