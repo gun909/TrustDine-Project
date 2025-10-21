@@ -1,4 +1,6 @@
-## TrustDine App This project is designed for AUT COMP826 Mobile System Development Year 2025
+## TrustDine App 
+
+!!!This project is designed for AUT COMP826 Mobile System Development Year 2025
 
 TrustDine is a cross-platform mobile app, using React Native + Node.js powered restaurant review platform built for food lovers in Auckland. It integrates Google Maps & TripAdvisor databases and store in Google SQL, performs intelligent scraping, and allows user-submitted reviews. The goal is to help users find the most trustworthy restaurants based on rating, location, and dish preferences.
 Demo Display Youtube Intro: https://www.youtube.com/watch?v=lAuEq4cH3fE
