@@ -41,24 +41,25 @@ TrustDine/
 │   ├── LoginScreen.js
 │   ├── SignUpScreen.js	   # Login/Sign-Up/Forgot Passwords Screens basically built for authorized access.	
 │   ├── HomeScreen.js	   # TrustDine Start Point, user input Google formatted Address to search restaurant near the address
-│   ├	└──SearchResultsScreen.js #Return search results from HomeScreen.js Table: google_reviews
+│   ├	└──SearchResultsScreen.js #Search Table: google_reviews and return search results from HomeScreen.js 
 │   ├──  ReviewScreen.js
 │   ├──  HistoryScreen.js   # Built for Admin only to approve user reviews and update tables stored in Google SQL	
 │   └── ProfileScreen.js   # Easily update user's email address
-├── restaurant-scraper/    # Node.js Google Places scraper
+├── restaurant-scraper/    # Node.js  !!!Important scraper module 1 (used for early-stage Google Map database construction, not running).
 │   ├── index.js
 │   └── package.json
-├── trustdish-api/         # (Placeholder for backend or API integration)
+├── tripadvisor-scraper/	# Node.js  !!!Important scraper module 2 (used for early-stage TripAdvisor database construction, not running).
+├── trustdish-api/         # !!! Important Pattern Presenter: Live backend stored on GitHub and deployed via Render to handle user requests (Currently running).
 ├── App.js                 # Main entry point
-├── regionPoints.js        # Auckland region coordinates
+├── regionPoints.js        # Database Scope Definition in Auckland region (16 main regions)
 ├── .env                   # Environment variables
 ├── package.json           # Frontend dependencies
-├── Database Tables	   # Three main tables example to record all the restaurant details
-│   ├── CreateDB Four Tables Explaination.sql	# Explain Four tables created method and stored in Google SQL
-│   ├──  Google_Reviews.csv			# Three Key tables example to record data starched from scraper
-│   ├──  Tripadvisor_TrustView.xlsx
-│   └──  User Reivews.xlsx
-└── TrustDine.apk	   # Andriod File, You can directly install it 100% virus free Garantee
+├── Database Tables	   # Three main tables stored in Google Cloud SQL to record all the restaurant and user details
+│   ├── CreateDB Four Tables Explaination.sql	# Explain How Four tables created and stored in Google SQL
+│   ├──  Google_Reviews.csv			# Key table (Locked) to record data scraped from Google Map
+│   ├──  Tripadvisor_TrustView.xlsx    # Key table to record and update data scraped from TripAdvisor
+│   └──  User Reviews.xlsx				# Key table to store user upload review
+└── TrustDine.apk	   # Andriod File, You can directly install it 100% virus free guarantee
 └── README.md              # This file
 
 
@@ -80,7 +81,7 @@ trustdine-DB/
 
 - [Node.js](https://nodejs.org/)
 - [Expo CLI](https://docs.expo.dev/get-started/installation/)
-- MySQL (e.g., Google Cloud SQL)
+- MySQL (Google Cloud SQL)
 - Google Maps & Places API Key
 
 ### 1. Install Dependencies
@@ -149,7 +150,7 @@ Screens include:
 ## Contributors
 
 - Edison Hu – Developer, Architect, UI Designer
-- GPT Assistant – Documentation support
+- GPT Assistant – Debugging for unsure error
 
 ---
 
