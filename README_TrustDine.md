@@ -1,9 +1,9 @@
 ## TrustDine App 
 
-!!!This project is designed for AUT COMP826 Mobile System Development Year 2025
+!!!Note: This project is designed for AUT COMP826 Mobile System Development Year 2025
 
 TrustDine is a cross-platform mobile app, using React Native + Node.js powered restaurant review platform built for food lovers in Auckland. It integrates Google Maps & TripAdvisor databases and store in Google SQL, performs intelligent scraping, and allows user-submitted reviews. The goal is to help users find the most trustworthy restaurants based on rating, location, and dish preferences.
-Demo Display Youtube Intro: https://www.youtube.com/watch?v=lAuEq4cH3fE
+-Demo Display Youtube Intro: https://www.youtube.com/watch?v=lAuEq4cH3fE
 
 ---
 
@@ -14,7 +14,7 @@ Demo Display Youtube Intro: https://www.youtube.com/watch?v=lAuEq4cH3fE
 - **Google Maps Integration**
   - Uses lat/lng from Google Places API for accurate listings
 - **Database Storage**
-- Uses Google SQL to store the database
+  - Uses Google SQL to store the database
 - **Restaurant Scraper Tool**
   - Built-in Node.js script to fetch restaurant metadata from Google
 - **User Reviews**
@@ -24,13 +24,13 @@ Demo Display Youtube Intro: https://www.youtube.com/watch?v=lAuEq4cH3fE
 - **Secure Authentication**
   - Sign up / login with hashed passwords and session tokens
 - **Mobile-First Design**
-  - Built with React Native and Material 3 UI theme (React Native Paper)
+  - Built with React Native and Google Material 3 UI Theme
 
 ---
 
 ## Project Structure
 
-All the files has been encrypted into ZIP, Pasword has been included in Project Summary.
+All the files has been encrypted into ZIP, Password has been included in Project Summary.
 
 ```
 TrustDine/
@@ -61,7 +61,7 @@ TrustDine/
 │   ├──  Google_Reviews.csv			# Key table (Locked) to record data scraped from Google Map
 │   ├──  Tripadvisor_TrustView.xlsx    # Key table to record and update data scraped from TripAdvisor
 │   └──  User Reviews.xlsx				# Key table to store user upload review
-└── TrustDine.apk	   # Andriod File, You can directly install it 100% virus free guarantee
+└── TrustDine.apk	   # Android File, You can directly install it 100% virus free guarantee
 └── README.md              # This file
 
 
