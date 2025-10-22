@@ -81,14 +81,14 @@ trustdine-DB/
 ## Database scraper Logic
 ```mermaid
 flowchart TD
-    A[Start] --> B[Define 13 Base Regions<br/>(lat/lng of Auckland areas)]
-    B --> C[Generate NSEW 1km Offsets<br/>for each region point]
-    C --> D[For each point:<br/>Call Google Places API<br/>Nearby Search (restaurant, radius=1000)]
-    D --> E[Filter results:<br/>rating >= 4.0]
-    E --> F[De-duplicate via place_id<br/>(in-memory map)]
-    F --> G[Assign Region Labels<br/>(e.g., Albany_North)]
-    G --> H[Insert into MySQL<br/>with UNIQUE(place_id)]
-    H --> I[Log progress, wait 1s<br/>per request to throttle]
+    A[Start] --> B[Define 13 Base Regions (lat/lng of Auckland areas)]
+    B --> C[Generate North, South, East, West 1km Offsets for each region point]
+    C --> D[For each point: Call Google Places API Nearby Search (restaurant, radius=1000)]
+    D --> E[Filter results: rating >= 4.0]
+    E --> F[De-duplicate via place_id (in-memory map)]
+    F --> G[Assign Region Labels (e.g., Albany_North)]
+    G --> H[Insert into MySQL with UNIQUE(place_id)]
+    H --> I[Log progress, wait 1s per request to throttle]
     I --> J[End]
 ```
 
