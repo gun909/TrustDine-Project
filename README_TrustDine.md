@@ -78,6 +78,21 @@ trustdine-DB/
 ├── User_Reviews		# Table 4, Store user new review info, will update Table 2 when Admin Approve. Update method: (New Review + Old Review * Old Review Numbers) / (Old Review Numbers +1)
 
 
+## Database scraper Logic
+```mermaid
+flowchart TD
+    A[Start] --> B[Define 13 Base Regions<br/>(lat/lng of Auckland areas)]
+    B --> C[Generate NSEW 1km Offsets<br/>for each region point]
+    C --> D[For each point:<br/>Call Google Places API<br/>Nearby Search (restaurant, radius=1000)]
+    D --> E[Filter results:<br/>rating >= 4.0]
+    E --> F[De-duplicate via place_id<br/>(in-memory map)]
+    F --> G[Assign Region Labels<br/>(e.g., Albany_North)]
+    G --> H[Insert into MySQL<br/>with UNIQUE(place_id)]
+    H --> I[Log progress, wait 1s<br/>per request to throttle]
+    I --> J[End]
+```
+
+
 ## Getting Started
 
 ### Prerequisites
