@@ -79,7 +79,7 @@ trustdine-DB/
 
 
 ## Database scraper Logic
-```mermaid
+```Mermaid.js
 flowchart TD
     A[Start] --> B[Define 13 Base Regions (lat/lng of Auckland areas)]
     B --> C[Generate North, South, East, West 1km Offsets for each region point]
