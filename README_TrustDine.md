@@ -134,7 +134,7 @@ Scan QR code using Expo Go app on your phone (Or Best way to download this APP A
 https://expo.dev/accounts/gun101/projects/trustdine/builds/05e6856e-27d1-478f-b171-25d1df8f0a2e
 
 
-## 4. RUN TrustDine APP Screens in Visual Studio (NOTE: the server for this APP is enabled 24/July/2025 till 1/Dec/2025)
+### 4. RUN TrustDine APP Screens in Visual Studio (NOTE: the server for this APP is enabled 24/July/2025 till 1/Dec/2025)
 
 ```bash
 npx expo start
