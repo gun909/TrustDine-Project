@@ -92,6 +92,14 @@ flowchart TD
     I --> J[End]
 ```
 
+## Screens Intro:
+- `HomeScreen.js`: Filter restaurants by region, rating, dish type
+- `SearchResultsScreen.js`: Table view of search results
+- `ReviewScreen.js`: Submit reviews for each restaurant
+- `SignUpScreen.js`, `LoginScreen.js`: User login and authorization
+- `ProfileScreen.js`, `HistoryScreen.js` Unfinished parts
+
+---
 
 ## Getting Started
 
@@ -131,15 +139,6 @@ https://expo.dev/accounts/gun101/projects/trustdine/builds/05e6856e-27d1-478f-b1
 ```bash
 npx expo start
 ```
-
-Screens include:
-- `HomeScreen.js`: Filter restaurants by region, rating, dish type
-- `SearchResultsScreen.js`: Table view of search results
-- `ReviewScreen.js`: Submit reviews for each restaurant
-- `SignUpScreen.js`, `LoginScreen.js`: User auth
-- `ProfileScreen.js`, `HistoryScreen.js`
-
----
 
 ### Optional: Check Restaurant-Scraper (NOTE: the server related to Scraper is now disabled because free only support one server running)
 
