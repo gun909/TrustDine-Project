@@ -82,7 +82,7 @@ trustdine-DB/
 ```Mermaid.js
 flowchart TD
     A[Start] --> B[Define 13 Base Regions (lat/lng of Auckland areas)]
-    B --> C[Generate North, South, East, West 1km Offsets for each region point]
+    B --> C[Generate North, South, East, West 1km Offsets for each region Center point (Total Five Points for each Regions)]
     C --> D[For each point: Call Google Places API Nearby Search (restaurant, radius=1000)]
     D --> E[Filter results: rating >= 4.0]
     E --> F[De-duplicate via place_id (in-memory map)]
@@ -120,27 +120,17 @@ MYSQL_PASSWORD=your_password
 MYSQL_DATABASE=your_database
 ```
 
-### 3. Run React Native App
-
-```bash
-npx expo start
-```
+### 3. Install React Native App & Expo Go
 
 Scan QR code using Expo Go app on your phone (Or Best way to download this APP Android Version and testing by GitHub New Version Release or using below link).
 https://expo.dev/accounts/gun101/projects/trustdine/builds/05e6856e-27d1-478f-b171-25d1df8f0a2e
 
 
-### 4. Run Scraper (NOTE: the server related to Scraper is now disabled because free only support one server running)
+## 4. RUN TrustDine APP Screens in Visual Studio (NOTE: the server for this APP is enabled 24/July/2025 till 1/Dec/2025)
 
 ```bash
-cd restaurant-scraper
-node index.js
+npx expo start
 ```
-
----
-
-## RUN TrustDine APP Screens in Visual Studio (NOTE: the server related to Scraper is now enabled 24/7 till 1/Dec/2025)
-cd npx expo start
 
 Screens include:
 - `HomeScreen.js`: Filter restaurants by region, rating, dish type
@@ -150,6 +140,16 @@ Screens include:
 - `ProfileScreen.js`, `HistoryScreen.js`
 
 ---
+
+### Optional: Check Restaurant-Scraper (NOTE: the server related to Scraper is now disabled because free only support one server running)
+
+```bash
+cd restaurant-scraper
+node index.js
+```
+
+---
+
 
 ## Security Notes
 
